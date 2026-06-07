@@ -2,6 +2,8 @@ import math
 
 from tool_base import Tool
 
+def to_n_bits(bits, decimal):
+    return "{:0{}b}".format(decimal, bits)
 
 class BinaryConverter(Tool):
     def run(self):
@@ -107,13 +109,13 @@ class DecimalConverter(Tool):
             elif choice == '4':  # Zweierkomplement
                 bits = int(input("Bit-Anzahl (z.B. 8): "))
                 if decimal >= 0:
-                    binary = format(decimal, '0{}b'.format(bits))
+                    binary = to_n_bits(bits, decimal)
                 else:
                     # 2er-Komplement berechnen
                     positive = abs(decimal)
                     max_val = 2 ** bits
                     twos_comp = max_val - positive
-                    binary = format(twos_comp, '0{}b'.format(bits))
+                    binary = to_n_bits(bits, twos_comp)
                 print("2er-Kompl.: {}".format(binary))
 
             elif choice == '5':  # Exzess
@@ -551,7 +553,7 @@ class ExcessConverter(Tool):
                     input("Enter zum Fortfahren...")
                     return
 
-                binary = format(excess_val, '0{}b'.format(bits))
+                binary = to_n_bits(bits,excess_val)
                 print("Exzess-Wert: {}".format(excess_val))
                 print("Exzess-Binär: {}".format(binary))
 
@@ -571,7 +573,7 @@ class ExcessConverter(Tool):
                 corrected = sum_val - bias
 
                 bits = max(len(a_bin), len(b_bin))
-                result_bin = format(corrected, '0{}b'.format(bits))
+                result_bin = to_n_bits(bits, corrected)
 
                 print("Summe: {}".format(sum_val))
                 print("Korrigiert: {}".format(corrected))
