@@ -383,20 +383,18 @@ class LZW(Tool):
 
         if choice == "1":
             return None  # Automatische Erkennung
-        elif choice == "2":
+        if choice == "2":
             return [str(i) for i in range(10)]
-        elif choice == "3":
+        if choice == "3":
             return [chr(i) for i in range(ord('A'), ord('Z') + 1)]
-        elif choice == "4":
+        if choice == "4":
             return [chr(i) for i in range(ord('a'), ord('z') + 1)]
-        elif choice == "5":
+        if choice == "5":
             chars_input = input("Zeichen eingeben: ").strip()
             if chars_input:
                 return list(chars_input)
-            else:
-                return [str(i) for i in range(10)]
-        else:
-            return [str(i) for i in range(10)]  # Default
+            return [str(i) for i in range(10)]
+        return [str(i) for i in range(10)]  # Default
 
     def run(self) -> None:
         """
@@ -494,6 +492,7 @@ class InfoAnalyseTool(Tool):
         self.probs = []
         self.codes = []
         self.results = {}
+        self.custom_codes = []
 
     def clear_screen(self):
         """Simuliert clear screen für bessere Übersicht"""
@@ -593,6 +592,7 @@ class InfoAnalyseTool(Tool):
         print("=== ZUSAMMENFASSUNG ===")
         print("Symbole: {}".format(len(self.symbols)))
         print("H(X): {:.3f} bit".format(self.results['entropy']))
+        print("H0: {:.3f} bit".format(self.results['h0']))
         print("RQ: {:.3f} bit".format(self.results['redundanz_quelle']))
 
         # Huffman berechnen
@@ -604,14 +604,14 @@ class InfoAnalyseTool(Tool):
     def show_entropy_details(self):
         """Details zur Entropie"""
         print("=== ENTROPIE DETAILS ===")
-        print("H(X) = -sum(p*log2(p))")
+        print("x: p(x)*I(x)=h_x")
         print("")
         total = 0
         for s, p in zip(self.symbols, self.probs):
             term = -p * math.log(p, 2)
             total += term
             print("{}: {:.3f}*{:.3f}={:.3f}".format(s, p, math.log(p, 2), term))
-        print("Sum: {:.6f} bit".format(total))
+        print("Sum: {:.6f} bit = H(X) = -sum(p*log2(p))".format(total))
 
     def show_redundanz_details(self):
         """Details zur Redundanz"""
@@ -639,6 +639,29 @@ class InfoAnalyseTool(Tool):
             print("{}: {:.3f}*{}={:.3f}".format(s, p, code_len, term))
         print("L = {:.6f} bit".format(total))
 
+    def analyse_encoding(self):
+        """Codierung analysieren"""
+        if not self.symbols:
+            print("Keine Daten!")
+            return
+
+        if len(self.custom_codes) == 0 or input("Neuen Code eingeben? (j/N)") == "j":
+            for i, s in enumerate(self.symbols):
+                self.custom_codes.append(input("Code für Symbol {} ({}): ".format(i + 1, s)))
+
+        length = sum(p * len(c) for (c, p) in zip(self.custom_codes, self.probs))
+        # duplicated code is best practice
+        entropy = -sum(p * math.log2(p) for p in self.probs if p > 0)
+        redundancy_c = length - entropy
+        redundancy_q = math.log(len(self.symbols), 2) - entropy
+
+        print("=== CODIERUNG ANALYSE ===")
+        print("")
+        print("L  = {}".format(round(length,3)))
+        print("H  = {}".format(round(entropy,3)))
+        print("RC = {}".format(round(redundancy_c,3)))
+        print("RQ = {}".format(round(redundancy_q,3)))
+
     def encode_message(self):
         """Nachricht codieren"""
         if not self.symbols:
@@ -656,7 +679,7 @@ class InfoAnalyseTool(Tool):
                 print("Zeichen '{}' unbekannt!".format(char))
                 return
 
-        print("Codiert: {}".format(encoded))
+        print("Codiert (Huffman): {}".format(encoded))
         print("Länge: {} bit".format(len(encoded)))
         orig_len = len(msg) * math.ceil(math.log(len(self.symbols), 2))
         print("Original: {} bit".format(orig_len))
@@ -676,8 +699,9 @@ class InfoAnalyseTool(Tool):
                 print("2) Entropie Details")
                 print("3) Redundanz Details")
                 print("4) Huffman Details")
-                print("5) Nachricht codieren")
-                print("6) Neue Daten")
+                print("5) Codierung analysieren")
+                print("6) Nachricht codieren")
+                print("7) Neue Daten")
             else:
                 print("Keine Daten vorhanden")
                 print("")
@@ -690,13 +714,12 @@ class InfoAnalyseTool(Tool):
 
             if choice == 'q':
                 break
-            elif choice == '1':
+            if choice == '1':
                 if self.symbols:
                     self.show_summary()
-                else:
-                    if self.input_data():
-                        self.calculate_all()
-                        self.show_summary()
+                elif self.input_data():
+                    self.calculate_all()
+                    self.show_summary()
             elif choice == '2' and self.symbols:
                 self.show_entropy_details()
             elif choice == '3' and self.symbols:
@@ -704,8 +727,10 @@ class InfoAnalyseTool(Tool):
             elif choice == '4' and self.symbols:
                 self.show_huffman_details()
             elif choice == '5' and self.symbols:
-                self.encode_message()
+                self.analyse_encoding()
             elif choice == '6' and self.symbols:
+                self.encode_message()
+            elif choice == '7' and self.symbols:
                 if self.input_data():
                     self.calculate_all()
             else:

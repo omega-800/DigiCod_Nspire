@@ -103,12 +103,11 @@ def select_tool(tools) -> None:
 
         input_str = input("Nr: ").strip()
 
-        if input_str == "":
+        if input_str in ["", "q"]:
             if path:
                 path.pop()  # Go up one level
                 continue
-            else:
-                return  # Exit menu
+            return  # Exit menu
 
         try:
             parts = list(map(int, input_str.split(".")))
