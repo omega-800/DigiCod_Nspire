@@ -211,6 +211,31 @@ class RLETool(Tool):
 
 class LZW(Tool):
 
+    def show_encoding_steps(self, data, initial_dict):
+        """
+        Zeigt detaillierte Kodierungsschritte (auf Anfrage)
+        """
+        print("\n=== KODIERUNGSSCHRITTE ===")
+
+        # Zeige Startwörterbuch
+        print("Start-Wörterbuch:")
+        for key, value in sorted(initial_dict.items(), key=lambda x: x[1]):
+            print("  {}: '{}'".format(value, key))
+
+        print("\nSchritte:")
+
+        result, dictionary, steps, c = self.lzw_encode(data, initial_dict)
+
+        for step in steps:
+            if len(step) == 5:
+                print("{}. '{}' -> {} | Neu: {}='{}'".format(*step))
+            else:
+                print("{}. '{}' -> {}".format(*step))
+
+        print("\nErgebnis: {}".format(' '.join(map(str, result))))
+        print("Kompression: {}".format(c))
+        return result
+
     def lzw_encode(self, data, initial_dict=None):
         """
         LZW Kompressionsalgorithmus mit optionalem Anfangswörterbuch
@@ -230,31 +255,40 @@ class LZW(Tool):
             raise ValueError("initial_dict muss None, Liste oder Dictionary sein")
 
         result = []
+        steps = []
         current_string = ""
+        step = 1
 
         for char in data:
-            # Versuche die Zeichenfolge zu erweitern
             new_string = current_string + char
 
             if new_string in dictionary:
-                # Zeichenfolge ist im Wörterbuch, erweitere weiter
                 current_string = new_string
+                index = dictionary[current_string]
             else:
-                # Zeichenfolge nicht im Wörterbuch
-                # Gib Index der aktuellen Zeichenfolge aus
-                result.append(dictionary[current_string])
+                # Ausgabe für aktuellen Schritt
+                if current_string:
+                    index = dictionary[current_string]
+                    result.append(index)
+                    next_index = len(dictionary)
 
-                # Füge neue Zeichenfolge zum Wörterbuch hinzu
-                dictionary[new_string] = len(dictionary)
+                    steps.append((step, current_string, index, next_index,
+                                  new_string))
 
-                # Beginne mit dem aktuellen Zeichen
+                    dictionary[new_string] = next_index
+                    step += 1
+
                 current_string = char
 
-        # Gib den Index der letzten Zeichenfolge aus
+        # Letzter Schritt
         if current_string:
-            result.append(dictionary[current_string])
+            index = dictionary[current_string]
+            result.append(index)
+            steps.append((step, current_string, index))
 
-        return result, dictionary
+        compression = round(len(result) / len(data), 5)
+
+        return result, dictionary, steps, compression
 
     def lzw_decode(self, encoded_data, initial_dict=None):
         """
@@ -306,67 +340,14 @@ class LZW(Tool):
         Kompakte LZW-Kodierung - zeigt nur das Ergebnis
         """
         try:
-            result, dictionary = self.lzw_encode(data, initial_dict)
+            result, dictionary, _, c = self.lzw_encode(data, initial_dict)
             print("Eingabe: {}".format(data))
             print("Kodiert: {}".format(' '.join(map(str, result))))
+            print("Kompression: {}".format(c))
             return result, dictionary
         except Exception as e:
             print("FEHLER: {}".format(str(e)))
             return None, None
-
-    def show_encoding_steps(self, data, dictionary):
-        """
-        Zeigt detaillierte Kodierungsschritte (auf Anfrage)
-        """
-        print("\n=== KODIERUNGSSCHRITTE ===")
-
-        # Hilfsfunktion für Formatierung
-        def pad_left(text, width):
-            text = str(text)
-            if len(text) >= width:
-                return text
-            return text + ' ' * (width - len(text))
-
-        result = []
-        current_string = ""
-        step = 1
-
-        # Zeige Startwörterbuch
-        print("Start-Wörterbuch:")
-        for key, value in sorted(dictionary.items(), key=lambda x: x[1]):
-            print("  {}: '{}'".format(value, key))
-
-        print("\nSchritte:")
-
-        for char in data:
-            new_string = current_string + char
-
-            if new_string in dictionary:
-                current_string = new_string
-            else:
-                # Ausgabe für aktuellen Schritt
-                if current_string:
-                    index = dictionary[current_string]
-                    result.append(index)
-                    next_index = len(dictionary)
-
-                    print("{}. '{}' -> {} | Neu: {}='{}'".format(
-                        step, current_string, index, next_index, new_string
-                    ))
-
-                    dictionary[new_string] = next_index
-                    step += 1
-
-                current_string = char
-
-        # Letzter Schritt
-        if current_string:
-            index = dictionary[current_string]
-            result.append(index)
-            print("{}. '{}' -> {}".format(step, current_string, index))
-
-        print("\nErgebnis: {}".format(' '.join(map(str, result))))
-        return result
 
     def show_final_dictionary(self, dictionary):
         """
