@@ -1,4 +1,5 @@
 from tool_base import *
+from tools_binary_conversion import to_n_bits
 import math
 
 
@@ -158,7 +159,7 @@ class RLETool(Tool):
             if choice == 3:
                 print("Beendet.")
                 break
-            elif choice not in [1, 2]:
+            if choice not in [1, 2]:
                 print("Nur 1, 2 oder 3 erlaubt.")
                 continue
 
@@ -176,31 +177,34 @@ class RLETool(Tool):
                     continue
 
             encoded, n_units = self.rle_encode(s)
-            print("Eingabe:")
-            print(s)
+            print("Eingabe:", s)
 
-            print("Lauflängenkodiert:")
             output_str = ""
             for sym, cnt in encoded:
                 if cnt == 1:
                     output_str += sym
                 else:
                     output_str += sym + str(cnt)
-            print(output_str)
+            print("Lauflängenkodiert:", output_str)
+
+            output_bin = encoded[0][0]
+            bitsize = math.log2(max(cnt for (_, cnt) in encoded)) + 1
+            for _, cnt in encoded:
+                output_bin += " " + to_n_bits(bitsize,cnt)
+            print("Binär:", output_bin)
 
             original_len = len(s)
             encoded_len = len(output_str)
             rate = round(encoded_len / original_len, 5)
-            print("Kompressionsrate:", rate)
+            encoded_len_bin = len(output_bin.replace(" ", ""))
+            rate_bin = round(encoded_len_bin / len(s.replace(" ","")), 5)
             print("Original:", original_len, "Einheiten")
-            print("Kodiert:", encoded_len, "Einheiten")
+            print("Kodiert:", encoded_len, " Binär: ", encoded_len_bin, "Einheiten")
+            print("Kompressionsrate:", rate, " Binär: ", rate_bin)
 
             decoded = self.rle_decode(encoded)
-            print("Überprüfung:", end=' ')
-            if decoded == s:
-                print("Dekodierung stimmt mit Original überein.")
-            else:
-                print("Fehler in der Dekodierung!")
+            if decoded != s:
+                print("Überprüfung: Fehler in der Dekodierung!")
 
             print("Drücke Enter zum Fortfahren...")
             input()  # Wartet auf Enter
