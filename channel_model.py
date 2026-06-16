@@ -83,16 +83,16 @@ class BaseChannelTool(Tool):
 
                 value = float(user_input)
                 if value < min_val:
-                    print("❌ Wert " + str(round(value, 6)) + " < " + str(
+                    print("X Wert " + str(round(value, 6)) + " < " + str(
                         round(min_val, 6)) + " (Minimum). Bitte erneut eingeben.")
                     continue
                 if value > max_val:
-                    print("❌ Wert " + str(round(value, 6)) + " > " + str(
+                    print("X Wert " + str(round(value, 6)) + " > " + str(
                         round(max_val, 6)) + " (Maximum). Bitte erneut eingeben.")
                     continue
                 return value
             except:
-                print("❌ Ungültige Eingabe. Bitte eine Zahl eingeben.")
+                print("X Ungültige Eingabe. Bitte eine Zahl eingeben.")
                 continue
 
     def safe_int_input(self, prompt, min_val, max_val):
@@ -105,14 +105,14 @@ class BaseChannelTool(Tool):
 
                 in_int = int(in_str)
                 if in_int < min_val:
-                    print("❌ Wert " + str(in_int) + " < " + str(min_val) + " (Minimum). Bitte erneut eingeben.")
+                    print("X Wert " + str(in_int) + " < " + str(min_val) + " (Minimum). Bitte erneut eingeben.")
                     continue
                 if in_int > max_val:
-                    print("❌ Wert " + str(in_int) + " > " + str(max_val) + " (Maximum). Bitte erneut eingeben.")
+                    print("X Wert " + str(in_int) + " > " + str(max_val) + " (Maximum). Bitte erneut eingeben.")
                     continue
                 return in_int
             except Exception as e:
-                print("❌ Ungültige Eingabe. Bitte eine Ganzzahl eingeben. {}".format(e))
+                print("X Ungültige Eingabe. Bitte eine Ganzzahl eingeben. {}".format(e))
                 continue
 
     def wait_for_continue(self):
@@ -139,7 +139,7 @@ class BaseChannelTool(Tool):
 
             if not errors:
                 if warnings:
-                    print("\n⚠️  WARNUNGEN:")
+                    print("\n!! WARNUNGEN:")
                     for warning in warnings:
                         print("   " + warning)
                     accept = input("\nTrotzdem fortfahren? (j/n/q): ").lower()
@@ -151,10 +151,10 @@ class BaseChannelTool(Tool):
                         print("Bitte Werte korrigieren:")
                         continue
                 else:
-                    print("✅ Eingabe gültig!")
+                    print("Eingabe gültig!")
                     return probs
             else:
-                print("\n❌ FEHLER gefunden:")
+                print("\nFEHLER gefunden:")
                 for error in errors:
                     print("   " + error)
 
@@ -199,7 +199,7 @@ class BaseChannelTool(Tool):
 
             if not errors:
                 if warnings:
-                    print("\n⚠️  WARNUNGEN:")
+                    print("\n!!  WARNUNGEN:")
                     for warning in warnings:
                         print("   " + warning)
                         return channel_matrix
@@ -207,10 +207,10 @@ class BaseChannelTool(Tool):
                         print("Bitte Matrix korrigieren:")
                         continue
                 else:
-                    print("✅ Kanalmatrix gültig!")
+                    print("Kanalmatrix gültig!")
                     return channel_matrix
             else:
-                print("\n❌ FEHLER in Kanalmatrix:")
+                print("\nFEHLER in Kanalmatrix:")
                 for error in errors:
                     print("   " + error)
 
@@ -323,14 +323,14 @@ class TransinformationTool(BaseChannelTool):
 
             # Plausibilitätsprüfung
             if transinformation < -self.tolerance:
-                print("❌ FEHLER: I(X;Y) = " + str(
+                print("FEHLER: I(X;Y) = " + str(
                     round(transinformation, 6)) + " < 0 (Transinformation kann nicht negativ sein!)")
             elif transinformation < 0:
                 print(
-                    "⚠️  WARNUNG: Kleine negative Abweichung korrigiert: " + str(round(transinformation, 10)) + " → 0")
+                    "!! WARNUNG: Kleine negative Abweichung korrigiert: " + str(round(transinformation, 10)) + " → 0")
 
         except Exception as e:
-            print("❌ Fehler: " + str(e))
+            print("Fehler: " + str(e))
 
         if self.wait_for_continue():
             return
@@ -492,7 +492,7 @@ class BinarySymmetricChannelTool(BaseChannelTool):
 
             # Validierung für BSC
             if error_prob > 0.5:
-                print("⚠️  WARNUNG: ε > 0.5 führt zu schlechterem Kanal als Raten!")
+                print("!! WARNUNG: ε > 0.5 führt zu schlechterem Kanal als Raten!")
 
             # Kanalmatrix
             channel_matrix = [
@@ -591,10 +591,10 @@ class BinarySymmetricChannelTool(BaseChannelTool):
                     print("Übertragungszeit: " + str(data_size) + " / " + str(round(effective_rate, 2)) + " = " + str(
                         round(transmission_time, 2)) + " s")
                 else:
-                    print("❌ Effektive Datenrate = 0, keine Übertragung möglich!")
+                    print("X Effektive Datenrate = 0, keine Übertragung möglich!")
 
         except Exception as e:
-            print("❌ Fehler: " + str(e))
+            print("Fehler: " + str(e))
 
         if self.wait_for_continue():
             return
@@ -653,7 +653,7 @@ class ChannelMatrixDeterminationTool(BaseChannelTool):
                     # Validiere ε
                     if epsilon < 0 or epsilon > 1:
                         print(
-                            "❌ FEHLER: Berechnetes ε = " + str(round(epsilon, 4)) + " nicht im gültigen Bereich [0, 1]")
+                            "X FEHLER: Berechnetes ε = " + str(round(epsilon, 4)) + " nicht im gültigen Bereich [0, 1]")
                         print("Die gegebenen Wahrscheinlichkeiten sind nicht mit einem BSC konsistent!")
                         if self.wait_for_continue():
                             return
@@ -686,9 +686,9 @@ class ChannelMatrixDeterminationTool(BaseChannelTool):
                     error_y0 = abs(calc_y0 - p_y0)
                     error_y1 = abs(calc_y1 - p_y1)
                     if error_y0 < self.tolerance and error_y1 < self.tolerance:
-                        print("✅ Verifikation erfolgreich!")
+                        print("Verifikation erfolgreich!")
                     else:
-                        print("⚠️  Abweichungen: Δy0=" + str(round(error_y0, 6)) + ", Δy1=" + str(round(error_y1, 6)))
+                        print("!! Abweichungen: Δy0=" + str(round(error_y0, 6)) + ", Δy1=" + str(round(error_y1, 6)))
 
                     # Vollständige Analyse anbieten
                     full_analysis = input("\nVollständige BSC-Analyse durchführen? (j/n/q): ").lower()
@@ -698,7 +698,7 @@ class ChannelMatrixDeterminationTool(BaseChannelTool):
                         print("\n--- Automatische BSC-Analyse mit ε = " + str(round(epsilon, 4)) + " ---")
 
                 else:
-                    print("❌ FEHLER: P(x0) = P(x1), kann ε nicht eindeutig bestimmen")
+                    print("FEHLER: P(x0) = P(x1), kann ε nicht eindeutig bestimmen")
             else:
                 print("\n==== ALLGEMEINER KANAL ====")
                 print("Allgemeine Kanalmatrix-Bestimmung für n×m Kanäle:")
@@ -707,7 +707,7 @@ class ChannelMatrixDeterminationTool(BaseChannelTool):
                 print("Implementierung für allgemeine Fälle nicht verfügbar.")
 
         except Exception as e:
-            print("❌ Fehler: " + str(e))
+            print("Fehler: " + str(e))
 
         if self.wait_for_continue():
             return
@@ -815,24 +815,24 @@ class ChannelTypeAnalysisTool(BaseChannelTool):
             # Zusätzliche Informationen
             print("\n==== INTERPRETATION ====")
             if is_deterministic and is_lossless:
-                print("📍 Perfekter Kanal: Keine Informationsverluste, bijektive Abbildung")
+                print("Perfekter Kanal: Keine Informationsverluste, bijektive Abbildung")
             elif is_deterministic:
-                print("📍 Deterministischer Kanal: Eindeutige Zuordnung, aber möglicherweise nicht umkehrbar")
+                print("Deterministischer Kanal: Eindeutige Zuordnung, aber möglicherweise nicht umkehrbar")
             elif is_lossless:
-                print("📍 Verlustfreier Kanal: Alle Eingaben am Ausgang unterscheidbar")
+                print("Verlustfreier Kanal: Alle Eingaben am Ausgang unterscheidbar")
             elif is_completely_disturbed:
-                print("📍 Vollständig gestörter Kanal: Keine Information übertragbar")
+                print("Vollständig gestörter Kanal: Keine Information übertragbar")
 
             if is_symmetric and n_inputs == 2:
                 epsilon = channel_matrix[0][1]
-                print("📍 Binärer symmetrischer Kanal mit ε = " + str(round(epsilon, 4)))
+                print("Binärer symmetrischer Kanal mit ε = " + str(round(epsilon, 4)))
 
             # Kanalkapazität für spezielle Fälle
             if is_completely_disturbed:
-                print("📍 Kanalkapazität C = 0 (keine Information übertragbar)")
+                print("Kanalkapazität C = 0 (keine Information übertragbar)")
             elif is_deterministic and is_lossless:
                 capacity = self.safe_log2(n_inputs)
-                print("📍 Kanalkapazität C = log₂(" + str(n_inputs) + ") = " + str(round(capacity, 4)) + " bit/Symbol")
+                print("Kanalkapazität C = log₂(" + str(n_inputs) + ") = " + str(round(capacity, 4)) + " bit/Symbol")
 
         except Exception as e:
             print("❌ Fehler: " + str(e))

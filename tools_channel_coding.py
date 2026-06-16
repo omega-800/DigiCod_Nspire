@@ -80,20 +80,20 @@ class BaseChannelCodingTool(tool_base.Tool):
                         break
 
                 if not valid:
-                    print("❌ Nur 0 und 1 erlaubt. Bitte erneut eingeben.")
+                    print("X Nur 0 und 1 erlaubt. Bitte erneut eingeben.")
                     continue
 
                 if len(value) < min_length:
-                    print("❌ Mindestens " + str(min_length) + " Bits erforderlich.")
+                    print("X Mindestens " + str(min_length) + " Bits erforderlich.")
                     continue
 
                 if len(value) > max_length:
-                    print("❌ Maximal " + str(max_length) + " Bits erlaubt.")
+                    print("X Maximal " + str(max_length) + " Bits erlaubt.")
                     continue
 
                 return value
             except:
-                print("❌ Ungültige Eingabe. Bitte erneut eingeben.")
+                print("X Ungültige Eingabe. Bitte erneut eingeben.")
                 continue
 
     def safe_int_input(self, prompt, min_val=1, max_val=100):
@@ -102,14 +102,14 @@ class BaseChannelCodingTool(tool_base.Tool):
             try:
                 value = int(input(prompt))
                 if value < min_val:
-                    print("❌ Wert " + str(value) + " < " + str(min_val) + " (Minimum).")
+                    print("X Wert " + str(value) + " < " + str(min_val) + " (Minimum).")
                     continue
                 if value > max_val:
-                    print("❌ Wert " + str(value) + " > " + str(max_val) + " (Maximum).")
+                    print("X Wert " + str(value) + " > " + str(max_val) + " (Maximum).")
                     continue
                 return value
             except Exception as e:
-                print("❌ Ungültige Eingabe. Bitte eine Ganzzahl eingeben. {}".format(e))
+                print("X Ungültige Eingabe. Bitte eine Ganzzahl eingeben. {}".format(e))
                 continue
 
     def binary_to_vector(self, binary_str):
@@ -136,7 +136,7 @@ class BaseChannelCodingTool(tool_base.Tool):
             errors2, _ = self.validate_binary_string(codeword2, "Codewort 2")
 
             if errors1 or errors2:
-                print("❌ HAMMING-DISTANZ BERECHNUNG ABGEBROCHEN:")
+                print("X HAMMING-DISTANZ BERECHNUNG ABGEBROCHEN:")
                 for error in errors1 + errors2:
                     print("   " + error)
                 return None
@@ -145,7 +145,7 @@ class BaseChannelCodingTool(tool_base.Tool):
         clean_cw2 = codeword2.replace(" ", "").replace("'", "")
 
         if len(clean_cw1) != len(clean_cw2):
-            print("❌ FEHLER: Codewörter haben unterschiedliche Längen")
+            print("X FEHLER: Codewörter haben unterschiedliche Längen")
             return None
 
         vec1 = self.binary_to_vector(clean_cw1)
@@ -229,20 +229,20 @@ class HammingDistanceTool(BaseChannelCodingTool):
                         if codewords:
                             expected_length = len(codewords[0].replace(" ", "").replace("'", ""))
                             if len(clean_cw) != expected_length:
-                                print("❌ Länge " + str(len(clean_cw)) + " ≠ " + str(expected_length) + " (erwartet).")
+                                print("X Länge " + str(len(clean_cw)) + " ≠ " + str(expected_length) + " (erwartet).")
                                 continue
 
                         codewords.append(cw)
                         break
                     else:
                         for error in errors:
-                            print("❌ " + error)
+                            print("X " + error)
                         print("Bitte erneut eingeben.")
 
             self.minimum_hamming_distance(codewords, validate=True)
 
         except Exception as e:
-            print("❌ Fehler: " + str(e))
+            print("X Fehler: " + str(e))
 
         input("\nDrücke Enter zum Fortfahren...")
 
@@ -256,18 +256,18 @@ class ParityMatrixTool(BaseChannelCodingTool):
 
         if validate:
             if not equations:
-                print("❌ FEHLER: Keine Prüfgleichungen gegeben")
+                print("X FEHLER: Keine Prüfgleichungen gegeben")
                 return None
 
             for i in range(len(equations)):
                 eq = equations[i]
                 if not eq:
-                    print("❌ FEHLER: Prüfgleichung " + str(i + 1) + " ist leer")
+                    print("X FEHLER: Prüfgleichung " + str(i + 1) + " ist leer")
                     return None
 
                 for pos in eq:
                     if not isinstance(pos, int) or pos <= 0:
-                        print("❌ FEHLER: Ungültige Position in Gleichung " + str(i + 1))
+                        print("X FEHLER: Ungültige Position in Gleichung " + str(i + 1))
                         return None
 
         print("Gegebene Prüfgleichungen:")
@@ -340,7 +340,7 @@ class ParityMatrixTool(BaseChannelCodingTool):
                         positions_str = input("Bit-Positionen: ").strip()
 
                         if not positions_str:
-                            print("❌ Keine Eingabe.")
+                            print("X Keine Eingabe.")
                             continue
 
                         positions = []
@@ -354,18 +354,18 @@ class ParityMatrixTool(BaseChannelCodingTool):
                                 break
 
                         if not valid:
-                            print("❌ Alle Positionen müssen > 0 sein.")
+                            print("X Alle Positionen müssen > 0 sein.")
                             continue
 
                         equations.append(positions)
                         pos_strs = []
                         for pos in positions:
                             pos_strs.append("x_" + str(pos))
-                        print("✅ Gleichung: " + " + ".join(pos_strs))
+                        print("Gleichung: " + " + ".join(pos_strs))
                         break
 
                     except:
-                        print("❌ Ungültige Eingabe.")
+                        print("X Ungültige Eingabe.")
                         continue
 
             H = self.create_parity_check_matrix(equations, validate=True)
@@ -382,7 +382,7 @@ class ParityMatrixTool(BaseChannelCodingTool):
                     syndrome_tool.calculate_error_syndrome(word, H, validate=True)
 
         except Exception as e:
-            print("❌ Fehler: " + str(e))
+            print("X Fehler: " + str(e))
 
         input("\nDrücke Enter zum Fortfahren...")
 
@@ -398,7 +398,7 @@ class ErrorSyndromeTool(BaseChannelCodingTool):
             word_errors, _ = self.validate_binary_string(received_word, "Empfangenes Wort")
 
             if word_errors:
-                print("❌ FEHLERSYNDROM-BERECHNUNG ABGEBROCHEN:")
+                print("X FEHLERSYNDROM-BERECHNUNG ABGEBROCHEN:")
                 for error in word_errors:
                     print("   " + error)
                 return None
@@ -409,7 +409,7 @@ class ErrorSyndromeTool(BaseChannelCodingTool):
         print("Empfangenes Wort: " + clean_word)
 
         if len(received_vec) != len(parity_check_matrix[0]):
-            print("❌ FEHLER: Wortlänge stimmt nicht mit Prüfmatrix überein")
+            print("X FEHLER: Wortlänge stimmt nicht mit Prüfmatrix überein")
             return None
 
         syndrome = []
@@ -448,9 +448,9 @@ class ErrorSyndromeTool(BaseChannelCodingTool):
                 break
 
         if not error_detected:
-            print("✅ s = 0 → Kein Fehler erkannt")
+            print("s = 0 → Kein Fehler erkannt")
         else:
-            print("❌ s ≠ 0 → Fehler erkannt")
+            print("s ≠ 0 → Fehler erkannt")
 
             syndrome_decimal = int(syndrome_str, 2)
             print("   Syndrom als Dezimalzahl: " + str(syndrome_decimal))
@@ -496,7 +496,7 @@ class ErrorSyndromeTool(BaseChannelCodingTool):
                         break
                     else:
                         for error in errors:
-                            print("❌ " + error)
+                            print("X " + error)
                         print("Bitte " + str(cols) + " Bits eingeben.")
 
             word = self.safe_binary_input("Empfangenes Wort (" + str(cols) + " Bits): ",
@@ -514,7 +514,7 @@ class ErrorSyndromeTool(BaseChannelCodingTool):
                     print("Fehler erkannt:   Nein")
 
         except Exception as e:
-            print("❌ Fehler: " + str(e))
+            print("X Fehler: " + str(e))
 
         input("\nDrücke Enter zum Fortfahren...")
 
@@ -615,7 +615,7 @@ class CRCCalculationTool(BaseChannelCodingTool):
             poly_errors, _ = self.validate_generator_polynomial(generator_poly, "Generatorpolynom")
 
             if data_errors or poly_errors:
-                print("❌ CRC-BERECHNUNG ABGEBROCHEN:")
+                print("X CRC-BERECHNUNG ABGEBROCHEN:")
                 for error in data_errors + poly_errors:
                     print("   " + error)
                 return None, None
@@ -662,7 +662,7 @@ class CRCCalculationTool(BaseChannelCodingTool):
                 if not errors:
                     break
                 for error in errors:
-                    print("❌ " + error)
+                    print("X " + error)
 
             while True:
                 generator = input("Generatorpolynom: ").strip()
@@ -670,7 +670,7 @@ class CRCCalculationTool(BaseChannelCodingTool):
                 if not errors:
                     break
                 for error in errors:
-                    print("❌ " + error)
+                    print("X " + error)
 
             result = self.crc_calculation(data, generator, validate=True)
             codeword = result[0] if result else None
@@ -683,7 +683,7 @@ class CRCCalculationTool(BaseChannelCodingTool):
                 print("CRC-Prüfbits:    " + self.vector_to_binary(remainder))
 
         except Exception as e:
-            print("❌ Fehler: " + str(e))
+            print("X Fehler: " + str(e))
 
         input("\nDrücke Enter zum Fortfahren...")
 
@@ -756,7 +756,7 @@ class CRCCheckTool(BaseChannelCodingTool):
             poly_errors, _ = self.validate_generator_polynomial(generator_poly, "Generatorpolynom")
 
             if word_errors or poly_errors:
-                print("❌ CRC-PRÜFUNG ABGEBROCHEN:")
+                print("X CRC-PRÜFUNG ABGEBROCHEN:")
                 for error in word_errors + poly_errors:
                     print("   " + error)
                 return None
@@ -787,11 +787,11 @@ class CRCCheckTool(BaseChannelCodingTool):
                 break
 
         if all_zero:
-            print("✅ Rest = 0 → Kein Fehler erkannt")
+            print("Rest = 0 → Kein Fehler erkannt")
             return True
         else:
             remainder_str = self.vector_to_binary(remainder)
-            print("❌ Rest = " + remainder_str + " ≠ 0 → Fehler erkannt")
+            print("Rest = " + remainder_str + " ≠ 0 → Fehler erkannt")
             return False
 
     def run(self):
@@ -805,7 +805,7 @@ class CRCCheckTool(BaseChannelCodingTool):
                 if not errors:
                     break
                 for error in errors:
-                    print("❌ " + error)
+                    print("X " + error)
 
             while True:
                 generator = input("Generatorpolynom: ").strip()
@@ -813,7 +813,7 @@ class CRCCheckTool(BaseChannelCodingTool):
                 if not errors:
                     break
                 for error in errors:
-                    print("❌ " + error)
+                    print("X " + error)
 
             is_valid = self.crc_check(received, generator, validate=True)
 
@@ -821,12 +821,12 @@ class CRCCheckTool(BaseChannelCodingTool):
                 print("\n==== ERGEBNIS ====")
                 print("Empfangenes Wort: " + received)
                 if is_valid:
-                    print("Status: ✅ GÜLTIG")
+                    print("Status: GÜLTIG")
                 else:
-                    print("Status: ❌ FEHLERHAFT")
+                    print("Status: FEHLERHAFT")
 
         except Exception as e:
-            print("❌ Fehler: " + str(e))
+            print("X Fehler: " + str(e))
 
         input("\nDrücke Enter zum Fortfahren...")
 
@@ -1960,7 +1960,7 @@ class CodePropertiesAnalysisTool(BaseChannelCodingTool):
                 print("Keine Ergebnisse verfügbar.")
 
         except Exception as e:
-            print("❌ Fehler: " + str(e))
+            print("X Fehler: " + str(e))
 
         input("\nDrücke Enter zum Fortfahren...")
 
