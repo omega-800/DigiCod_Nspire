@@ -1384,6 +1384,7 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
         print("2. Parameter")
         print("3. Berechnung")
         print("4. Matrix")
+        print("5. Kontrollstellen ermitteln für Codewort")
         print("9. Zurueck")
         print("0. Beenden")
 
@@ -1445,7 +1446,7 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
             return False
 
         equations = []
-        print("Format: 1 2 3 4")
+        print("Format (ohne Prüfbits): 1 2 3 4")
         for i in range(n_eq):
             while True:
                 pos_str = self.get_choice("Gl. " + str(i + 1) + ": ")
@@ -1488,8 +1489,56 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
                 self.show_hamming_calculation(equations)
             elif detail == 4:
                 self.show_parity_matrix(equations)
+            elif detail == 5:
+                self.show_codeword_ctrl(equations)
             else:
                 print("Ungueltig!")
+
+    def show_codeword_ctrl(self, equations):
+        """Berechnet Kontrollstellen"""
+        self.clear_screen()
+
+        eqs = []
+        if input("Kontrollbits bekannt? (j/n) ") == 'j':
+            eqs = [[int(input(f"Kontrollbitposition {i+1}: "))] + e for i, e in enumerate(equations)]
+        else:
+            eqs = [[i + 1 + len(equations)] + e for i, e in enumerate(equations)]
+
+        def h_times_v(v):
+            ns = []
+            for e in eqs:
+                s = 0
+                for i, c in enumerate(v):
+                    if i+1 in e and c == '1':
+                        s+=1
+                ns.append(s % 2)
+            return ''.join(str(n) for n in ns)
+
+        def flip(c):
+            return '1' if c == '0' else '0'
+
+        def is_valid(w):
+            return len(w) > 0 and all(c in ('0','1') for c in w)
+
+        w = ""
+        while not is_valid(w):
+            w = input("Codewort: ")
+        ctrls = h_times_v(w)
+
+        print("=== KONTROLLSTELLEN ===")
+        print("Kontrollstellen: " + ctrls)
+        print("Codewort: " + w + ctrls)
+        while True:
+            if input("Fehlersyndrome berechnen? (n/j) ") != 'j':
+                break
+            # FIXME: seems wrong
+            n = int(input("Anzahl gestörte Positionen: "))
+            xs = [int(input(f"Position {i+1}: ")) for i in range(n)]
+            nw = [flip(c) if i+1 in xs else c for i, c in enumerate(w)]
+            ctrls = h_times_v(nw)
+            print("Fehlersyndrom: " + ctrls)
+
+        input("Enter...")
 
     def show_hamming_properties(self):
         """Hamming Eigenschaften"""
@@ -1514,10 +1563,13 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
             for pos in eq:
                 max_pos = max(max_pos, pos)
         n_est = max_pos + k
+        m = n_est - k
 
         print("Kontrollbits k: " + str(k))
         print("Geschaetzt n: " + str(n_est))
-        print("Datenbits m: " + str(n_est - k))
+        print("Datenbits m: " + str(m))
+        print("Gültige Codewörter 2^m: " + str(2 ** m))
+        print("Mögliche Codewörter 2^(m+k): " + str(2 ** n_est))
         print("Coderate: " + str(n_est - k) + "/" + str(n_est))
         input("Enter...")
 
