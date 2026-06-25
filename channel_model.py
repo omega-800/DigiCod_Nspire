@@ -97,23 +97,25 @@ class BaseChannelTool(Tool):
 
     def safe_int_input(self, prompt, min_val, max_val):
         """Sichere Eingabe von Ganzzahlen mit Validierung"""
-        while True:
-            try:
-                in_str = input(prompt + " (oder 'q' für Hauptmenü): ")
-                if in_str.lower() == 'q':
-                    return 'q'
-
-                in_int = int(in_str)
-                if in_int < min_val:
-                    print("X Wert " + str(in_int) + " < " + str(min_val) + " (Minimum). Bitte erneut eingeben.")
-                    continue
-                if in_int > max_val:
-                    print("X Wert " + str(in_int) + " > " + str(max_val) + " (Maximum). Bitte erneut eingeben.")
-                    continue
-                return in_int
-            except Exception as e:
-                print("X Ungültige Eingabe. Bitte eine Ganzzahl eingeben. {}".format(e))
-                continue
+        return int(input(prompt))
+        # FIXME: bugs with ti-nspire micropython black magic fuckery
+        # while True:
+        #     try:
+        #         in_str = input(prompt + " (oder 'q' für Hauptmenü): ")
+        #         if in_str.lower() == 'q':
+        #             return 'q'
+        #
+        #         in_int = int(in_str)
+        #         if in_int < min_val:
+        #             print("X Wert " + str(in_int) + " < " + str(min_val) + " (Minimum). Bitte erneut eingeben.")
+        #             continue
+        #         if in_int > max_val:
+        #             print("X Wert " + str(in_int) + " > " + str(max_val) + " (Maximum). Bitte erneut eingeben.")
+        #             continue
+        #         return in_int
+        #     except Exception as e:
+        #         print("X Ungültige Eingabe. Bitte eine Ganzzahl eingeben. {}".format(e))
+        #         continue
 
     def wait_for_continue(self):
         """Wartet auf Benutzereingabe mit Möglichkeit zurück zum Hauptmenü zu gehen"""
@@ -145,37 +147,34 @@ class BaseChannelTool(Tool):
                     accept = input("\nTrotzdem fortfahren? (j/n/q): ").lower()
                     if accept == 'q':
                         return 'q'
-                    elif accept == 'j':
+                    if accept == 'j':
                         return probs
-                    else:
-                        print("Bitte Werte korrigieren:")
-                        continue
-                else:
-                    print("Eingabe gültig!")
-                    return probs
-            else:
-                print("\nFEHLER gefunden:")
-                for error in errors:
-                    print("   " + error)
+                    print("Bitte Werte korrigieren:")
+                    continue
+                print("Eingabe gültig!")
+                return probs
+            print("\nFEHLER gefunden:")
+            for error in errors:
+                print("   " + error)
 
-                # Automatische Korrektur anbieten
-                total = sum(probs)
-                if abs(total - 1.0) > self.tolerance and total > 0:
-                    print("\nAutomatische Normalisierung möglich:")
-                    normalized = []
-                    for p in probs:
-                        normalized.append(p / total)
-                    normalized_rounded = []
-                    for p in normalized:
-                        normalized_rounded.append(round(p, 6))
-                    print("Normalisierte Werte: " + str(normalized_rounded))
-                    use_normalized = input("Normalisierte Werte verwenden? (j/n/q): ").lower()
-                    if use_normalized == 'q':
-                        return 'q'
-                    elif use_normalized == 'j':
-                        return normalized
-                print("Bitte Eingabe wiederholen:")
-                continue
+            # Automatische Korrektur anbieten
+            total = sum(probs)
+            if abs(total - 1.0) > self.tolerance and total > 0:
+                print("\nAutomatische Normalisierung möglich:")
+                normalized = []
+                for p in probs:
+                    normalized.append(p / total)
+                normalized_rounded = []
+                for p in normalized:
+                    normalized_rounded.append(round(p, 6))
+                print("Normalisierte Werte: " + str(normalized_rounded))
+                use_normalized = input("Normalisierte Werte verwenden? (j/n/q): ").lower()
+                if use_normalized == 'q':
+                    return 'q'
+                if use_normalized == 'j':
+                    return normalized
+            print("Bitte Eingabe wiederholen:")
+            continue
 
     def input_channel_matrix_with_validation(self, n_inputs, n_outputs):
         """Eingabe einer Kanalmatrix mit automatischer Validierung"""
@@ -202,46 +201,44 @@ class BaseChannelTool(Tool):
                     print("\n!!  WARNUNGEN:")
                     for warning in warnings:
                         print("   " + warning)
+                        # what
                         return channel_matrix
-                    else:
-                        print("Bitte Matrix korrigieren:")
-                        continue
-                else:
-                    print("Kanalmatrix gültig!")
-                    return channel_matrix
-            else:
-                print("\nFEHLER in Kanalmatrix:")
-                for error in errors:
-                    print("   " + error)
+                    print("Bitte Matrix korrigieren:")
+                    continue
+                print("Kanalmatrix gültig!")
+                return channel_matrix
 
-                # Automatische Normalisierung anbieten
-                can_normalize = True
-                for row in channel_matrix:
-                    if sum(row) <= 0:
-                        can_normalize = False
-                        break
+            print("\nFEHLER in Kanalmatrix:")
+            for error in errors:
+                print("   " + error)
 
-                if can_normalize:
-                    print("Automatische Zeilennormalisierung möglich:")
-                    normalized_matrix = []
-                    for i in range(len(channel_matrix)):
-                        row = channel_matrix[i]
-                        row_sum = sum(row)
-                        normalized_row = []
-                        for p in row:
-                            normalized_row.append(p / row_sum)
-                        normalized_matrix.append(normalized_row)
-                        rounded_row = []
-                        for p in normalized_row:
-                            rounded_row.append(round(p, 6))
-                        print("  Zeile " + str(i) + ": " + str(rounded_row))
-                    use_normalized = input("Normalisierte Matrix verwenden? (j/n/q): ").lower()
-                    if use_normalized == 'q':
-                        return 'q'
-                    elif use_normalized == 'j':
-                        return normalized_matrix
-                print("Bitte Matrix-Eingabe wiederholen:")
-                continue
+            # Automatische Normalisierung anbieten
+            can_normalize = True
+            for row in channel_matrix:
+                if sum(row) <= 0:
+                    can_normalize = False
+                    break
+
+            if can_normalize:
+                print("Automatische Zeilennormalisierung möglich:")
+                normalized_matrix = []
+                for i, row in enumerate(channel_matrix):
+                    row_sum = sum(row)
+                    normalized_row = []
+                    for p in row:
+                        normalized_row.append(p / row_sum)
+                    normalized_matrix.append(normalized_row)
+                    rounded_row = []
+                    for p in normalized_row:
+                        rounded_row.append(round(p, 6))
+                    print("  Zeile " + str(i) + ": " + str(rounded_row))
+                use_normalized = input("Normalisierte Matrix verwenden? (j/n/q): ").lower()
+                if use_normalized == 'q':
+                    return 'q'
+                if use_normalized == 'j':
+                    return normalized_matrix
+            print("Bitte Matrix-Eingabe wiederholen:")
+            continue
 
     def safe_log2(self, x):
         """Sichere log2 Berechnung für MicroPython"""
@@ -342,15 +339,11 @@ class MaximumLikelihoodTool(BaseChannelTool):
     def run(self):
         print("==== Maximum-Likelihood-Entscheider ====")
         try:
-            n_input = int(input("Anzahl der Eingangssymbole: "))
-            # bugs with ti-nspire micropython black magic fuckery
-            # n_input = self.safe_int_input("Anzahl der Eingangssymbole: ", 2, 10)
+            n_input = self.safe_int_input("Anzahl der Eingangssymbole: ", 2, 10)
             if n_input == 'q':
                 return
 
-            n_output = int(input("Anzahl der Ausgangssymbole: "))
-            # bugs with ti-nspire micropython black magic fuckery
-            # n_output = self.safe_int_input("Anzahl der Ausgangssymbole: ", 2, 10)
+            n_output = self.safe_int_input("Anzahl der Ausgangssymbole: ", 2, 10)
             if n_output == 'q':
                 return
 
@@ -396,39 +389,39 @@ class MaximumLikelihoodTool(BaseChannelTool):
 
             # Berechne Fehlerwahrscheinlichkeit falls gewünscht
             calc_error = input("\nFehlerwahrscheinlichkeit berechnen? (j/n/q): ").lower()
-            if calc_error == 'q':
+            if calc_error in ['q', 'n']:
                 return
-            elif calc_error == 'j':
-                # Eingabewahrscheinlichkeiten mit Validierung
-                px = self.input_probabilities_with_validation("Eingabewahrscheinlichkeiten P(X)", n_input)
-                if px == 'q':
-                    return
+            # Eingabewahrscheinlichkeiten mit Validierung
+            px = self.input_probabilities_with_validation("Eingabewahrscheinlichkeiten P(X)", n_input)
+            if px == 'q':
+                return
 
-                # Berechne Fehlerwahrscheinlichkeit
-                total_error_prob = 0
-                print("\n==== FEHLERWAHRSCHEINLICHKEITS-BERECHNUNG ====")
+            # Berechne Fehlerwahrscheinlichkeit
+            total_error_prob = 0
+            print("\n==== FEHLERWAHRSCHEINLICHKEITS-BERECHNUNG ====")
 
-                for i in range(n_input):
-                    for j in range(n_output):
-                        decision = decoder[j]
-                        is_error = (decision != i)
-                        prob_contribution = px[i] * channel_matrix[i][j]
+            for i in range(n_input):
+                for j in range(n_output):
+                    decision = decoder[j]
+                    is_error = decision != i
+                    prob_contribution = px[i] * channel_matrix[i][j]
 
-                        if is_error:
-                            total_error_prob += prob_contribution
-                            error_indicator = "✗"
-                        else:
-                            error_indicator = "✓"
+                    if is_error:
+                        total_error_prob += prob_contribution
+                        error_indicator = "✗"
+                    else:
+                        error_indicator = "✓"
 
-                        print("P(x" + str(i) + ") * P(y" + str(j) + "|x" + str(i) + ") = " + str(
-                            round(px[i], 3)) + " * " + str(round(channel_matrix[i][j], 3)) + " = " + str(
-                            round(prob_contribution, 4)) + " [y" + str(j) + "→x" + str(
-                            decision) + "] " + error_indicator)
+                    print("P(x" + str(i) + ") * P(y" + str(j) + "|x" + str(i) + ") = " +
+                            str(round(px[i], 3)) + " * " + str(round(channel_matrix[i][j], 3)) + 
+                            " = " + str(round(prob_contribution, 4)) + " [y" + str(j) + "→x" +
+                            str(decision) + "] " + error_indicator
+                        )
 
-                print("\nGesamtfehlerwahrscheinlichkeit: P(Fehler) = " + str(round(total_error_prob, 4)))
+            print("\nGesamtfehlerwahrscheinlichkeit: P(Fehler) = " + str(round(total_error_prob, 4)))
 
         except Exception as e:
-            print("❌ Fehler: " + str(e))
+            print("X Fehler: " + str(e))
 
         if self.wait_for_continue():
             return
@@ -454,19 +447,18 @@ class EntropyCalculationTool(BaseChannelTool):
             print()
 
             entropy = 0
-            for i in range(len(probs)):
-                p = probs[i]
+            for i, p in enumerate(probs):
                 if p > 0:
                     log_val = self.safe_log2(p)
                     contribution = -p * log_val
                     entropy += contribution
-                    print("i=" + str(i) + ": p(x" + str(i) + ") = " + str(round(p, 4)) + ", log₂(" + str(
-                        round(p, 4)) + ") = " + str(round(log_val, 4)))
-                    print("      Beitrag: -" + str(round(p, 4)) + " * " + str(round(log_val, 4)) + " = " + str(
-                        round(contribution, 4)))
+                    print("i=" + str(i) + ": p(x" + str(i) + ") = " + str(round(p, 4)) + ", log₂(" +
+                        str(round(p, 4)) + ") = " + str(round(log_val, 4)))
+                    print("      Beitrag: -" + str(round(p, 4)) + " * " + str(round(log_val, 4)) +
+                        " = " + str(round(contribution, 4)))
                 else:
-                    print("i=" + str(i) + ": p(x" + str(i) + ") = " + str(round(p, 4)) + ", log₂(" + str(
-                        round(p, 4)) + ") = undefined (→ 0)")
+                    print("i=" + str(i) + ": p(x" + str(i) + ") = " + str(round(p, 4)) + ", log₂(" + 
+                        str(round(p, 4)) + ") = undefined (→ 0)")
 
             print("\nH(X) = " + str(round(entropy, 4)) + " bits")
 
@@ -478,7 +470,7 @@ class EntropyCalculationTool(BaseChannelTool):
                 print("Redundanz: " + str(round(redundancy, 4)) + " bits")
 
         except Exception as e:
-            print("❌ Fehler: " + str(e))
+            print("X Fehler: " + str(e))
 
         if self.wait_for_continue():
             return
@@ -513,7 +505,7 @@ class BinarySymmetricChannelTool(BaseChannelTool):
             equal_input = input("\nGleichverteilte Eingabe verwenden? (j/n/q): ").lower()
             if equal_input == 'q':
                 return
-            elif equal_input == 'n':
+            if equal_input == 'n':
                 input_probs = self.input_probabilities_with_validation("Eingabewahrscheinlichkeiten P(X)", 2)
                 if input_probs == 'q':
                     return
@@ -547,11 +539,11 @@ class BinarySymmetricChannelTool(BaseChannelTool):
                 if p > 0:
                     hy += -p * self.safe_log2(p)
 
-            if error_prob == 0 or error_prob == 1:
+            if error_prob in [0, 1]:
                 hy_given_x = 0
             else:
-                hy_given_x = -error_prob * self.safe_log2(error_prob) - (1 - error_prob) * self.safe_log2(
-                    1 - error_prob)
+                hy_given_x = -error_prob * self.safe_log2(error_prob) -
+                            (1 - error_prob) * self.safe_log2(1 - error_prob)
 
             mutual_info = hy - hy_given_x
 
@@ -839,7 +831,7 @@ class ChannelTypeAnalysisTool(BaseChannelTool):
                 print("Kanalkapazität C = log₂(" + str(n_inputs) + ") = " + str(round(capacity, 4)) + " bit/Symbol")
 
         except Exception as e:
-            print("❌ Fehler: " + str(e))
+            print("X Fehler: " + str(e))
 
         if self.wait_for_continue():
             return
