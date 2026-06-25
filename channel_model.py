@@ -342,11 +342,15 @@ class MaximumLikelihoodTool(BaseChannelTool):
     def run(self):
         print("==== Maximum-Likelihood-Entscheider ====")
         try:
-            n_input = self.safe_int_input("Anzahl der Eingangssymbole: ", 2, 10)
+            n_input = int(input("Anzahl der Eingangssymbole: "))
+            # bugs with ti-nspire micropython black magic fuckery
+            # n_input = self.safe_int_input("Anzahl der Eingangssymbole: ", 2, 10)
             if n_input == 'q':
                 return
 
-            n_output = self.safe_int_input("Anzahl der Ausgangssymbole: ", 2, 10)
+            n_output = int(input("Anzahl der Ausgangssymbole: "))
+            # bugs with ti-nspire micropython black magic fuckery
+            # n_output = self.safe_int_input("Anzahl der Ausgangssymbole: ", 2, 10)
             if n_output == 'q':
                 return
 
