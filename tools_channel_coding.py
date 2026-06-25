@@ -296,8 +296,7 @@ class ParityMatrixTool(BaseChannelCodingTool):
         print("  Mögliche codewörter: = " + str(2 ** (n_bits)))
 
         H = []
-        for i in range(len(equations)):
-            eq = equations[i]
+        for i, eq in enumerate(equations):
             row = []
             for j in range(n_bits):
                 row.append(0)
@@ -310,14 +309,13 @@ class ParityMatrixTool(BaseChannelCodingTool):
         print("\nPrüfmatrix H (" + str(len(H)) + "×" + str(n_bits) + "):")
         print("      ", end="")
         for j in range(n_bits):
-            print("x" + str(j + 1).rjust(2), end=" ")
+            print("x% 2s" % str(j + 1), end=" ")
         print()
 
-        for i in range(len(H)):
-            row = H[i]
+        for i, row in enumerate(H):
             print("p" + str(i + 1) + ": ", end="")
             for val in row:
-                print(" " + str(val).rjust(2), end=" ")
+                print(" % 2s" % str(val), end=" ")
             print()
 
         return H
@@ -415,8 +413,7 @@ class ErrorSyndromeTool(BaseChannelCodingTool):
         syndrome = []
         print("\nSyndrom-Berechnung (s = H × r^T):")
 
-        for i in range(len(parity_check_matrix)):
-            row = parity_check_matrix[i]
+        for i, row in enumerate(parity_check_matrix):
             syndrome_bit = 0
             for j in range(len(received_vec)):
                 syndrome_bit += row[j] * received_vec[j]
@@ -494,10 +491,9 @@ class ErrorSyndromeTool(BaseChannelCodingTool):
                         clean_row = row_str.replace(" ", "").replace("'", "")
                         H.append(self.binary_to_vector(clean_row))
                         break
-                    else:
-                        for error in errors:
-                            print("X " + error)
-                        print("Bitte " + str(cols) + " Bits eingeben.")
+                    for error in errors:
+                        print("X " + error)
+                    print("Bitte " + str(cols) + " Bits eingeben.")
 
             word = self.safe_binary_input("Empfangenes Wort (" + str(cols) + " Bits): ",
                                           min_length=cols, max_length=cols)
@@ -789,10 +785,9 @@ class CRCCheckTool(BaseChannelCodingTool):
         if all_zero:
             print("Rest = 0 → Kein Fehler erkannt")
             return True
-        else:
-            remainder_str = self.vector_to_binary(remainder)
-            print("Rest = " + remainder_str + " ≠ 0 → Fehler erkannt")
-            return False
+        remainder_str = self.vector_to_binary(remainder)
+        print("Rest = " + remainder_str + " ≠ 0 → Fehler erkannt")
+        return False
 
     def run(self):
         """Führt die CRC-Prüfung durch"""
@@ -1050,11 +1045,10 @@ class PolynomialDivisionTool(BaseChannelCodingTool):
             if result == dividend:
                 print("Verifikation: OK")
                 return True
-            else:
-                print("Verifikation: FEHLER")
-                print("Erwartet: " + self.vector_to_binary(dividend))
-                print("Erhalten: " + self.vector_to_binary(result))
-                return False
+            print("Verifikation: FEHLER")
+            print("Erwartet: " + self.vector_to_binary(dividend))
+            print("Erhalten: " + self.vector_to_binary(result))
+            return False
 
         except Exception as e:
             print("X Verifikation: " + str(e))
@@ -1203,7 +1197,7 @@ class CyclicCodeAnalysisTool(BaseChannelCodingTool):
 
             if choice == 'q':
                 break
-            elif choice == '1':
+            if choice == '1':
                 self.show_h_matrix(result)
             elif choice == '2':
                 self.show_parity_equations(result)
@@ -1325,7 +1319,7 @@ class CyclicCodeAnalysisTool(BaseChannelCodingTool):
 
                         if choice == 'q':
                             return
-                        elif choice == '1':
+                        if choice == '1':
                             self.show_details_menu(result)
                         elif choice == '2':
                             break
@@ -1350,7 +1344,7 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
             print('\033[2J\033[H')
         except:
             # Fallback: mehrere Leerzeilen
-            for i in range(5):
+            for _ in range(5):
                 print('')
 
     def show_main_menu(self):
@@ -1419,7 +1413,7 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
                 if choice == 0:
                     print("Programm beendet.")
                     break
-                elif choice == 1:
+                if choice == 1:
                     if self.hamming_analysis():
                         break
                 elif choice == 2:
@@ -1484,9 +1478,9 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
 
             if detail == 0:
                 return True
-            elif detail == 9:
+            if detail == 9:
                 return False
-            elif detail == 1:
+            if detail == 1:
                 self.show_hamming_properties()
             elif detail == 2:
                 self.show_hamming_parameters(equations)
@@ -1518,8 +1512,7 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
         max_pos = 0
         for eq in equations:
             for pos in eq:
-                if pos > max_pos:
-                    max_pos = pos
+                max_pos = max(max_pos, pos)
         n_est = max_pos + k
 
         print("Kontrollbits k: " + str(k))
@@ -1578,9 +1571,9 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
 
             if detail == 0:
                 return True
-            elif detail == 9:
+            if detail == 9:
                 return False
-            elif detail == 1:
+            if detail == 1:
                 self.show_crc_properties()
             elif detail == 2:
                 self.show_crc_parameters(gen, degree)
@@ -1664,9 +1657,9 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
 
             if detail == 0:
                 return True
-            elif detail == 9:
+            if detail == 9:
                 return False
-            elif detail == 1:
+            if detail == 1:
                 self.show_block_properties(min_dist)
             elif detail == 2:
                 self.show_block_parameters(codewords, min_dist)
@@ -1774,8 +1767,7 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
         max_pos = 0
         for eq in equations:
             for pos in eq:
-                if pos > max_pos:
-                    max_pos = pos
+                max_pos = max(max_pos, pos)
 
         print("H-Matrix:")
         for i, eq in enumerate(equations):
@@ -1798,8 +1790,7 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
         for i in range(len(codewords)):
             for j in range(i + 1, len(codewords)):
                 dist = self.hamming_distance(codewords[i], codewords[j])
-                if dist < min_dist:
-                    min_dist = dist
+                min_dist = min(min_dist, dist)
 
         return min_dist if min_dist < 999999 else 0
 
@@ -1828,13 +1819,10 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
                     while j < len(poly) and poly[j].isdigit():
                         degree_str += poly[j]
                         j += 1
-                    degree = int(degree_str)
-                    if degree > max_degree:
-                        max_degree = degree
+                    max_degree = max(max_degree, int(degree_str))
                     i = j
                 else:
-                    if max_degree < 1:
-                        max_degree = 1
+                    max_degree = max(max_degree, 1)
                     i += 1
             else:
                 i += 1
@@ -1851,8 +1839,7 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
                 value = int(value_str)
                 if min_val <= value <= max_val:
                     return value
-                else:
-                    print("Bereich: " + str(min_val) + "-" + str(max_val))
+                print("Bereich: " + str(min_val) + "-" + str(max_val))
             except:
                 print("Zahl eingeben!")
 
@@ -1908,12 +1895,14 @@ class CodePropertiesAnalysisTool(BaseChannelCodingTool):
                     print("  → " + str(t) + "-Error-Correction Code")
 
         # Generator-Polynom Analyse
-        generator_poly = kwargs.get('generator_poly')
-        if generator_poly:
-            print("2. GENERATOR-POLYNOM ANALYSE:")
-            cyclic_tool = CyclicCodeAnalysisTool()
-            poly_analysis = cyclic_tool.cyclic_code_analysis(generator_poly, validate=validate)
-            results['polynomial_analysis'] = poly_analysis
+        # TODO: implement CyclicCodeAnalysisTool.cyclic_code_analysis
+        # generator_poly = kwargs.get('generator_poly')
+        # if generator_poly:
+            # print("2. GENERATOR-POLYNOM ANALYSE:")
+            # cyclic_tool = CyclicCodeAnalysisTool()
+            # doesn't exist? my slop hallucination senses are tingling
+            # poly_analysis = cyclic_tool.cyclic_code_analysis(generator_poly, validate=validate)
+            # results['polynomial_analysis'] = poly_analysis
 
         return results
 
@@ -1940,7 +1929,8 @@ class CodePropertiesAnalysisTool(BaseChannelCodingTool):
             if choice in ["2", "3"]:
                 while True:
                     generator_poly = input("Generatorpolynom: ").strip()
-                    errors, warnings = self.validate_generator_polynomial(generator_poly)
+                    # we don't care about warnings ig
+                    errors, _ = self.validate_generator_polynomial(generator_poly)
                     if not errors:
                         break
                     for error in errors:
@@ -1986,7 +1976,7 @@ class CodeParametersAndBoundsTool(BaseChannelCodingTool):
         """Berechnet den Binomialkoeffizienten C(n, k)."""
         if k_items < 0 or k_items > n_items:
             return 0
-        if k_items == 0 or k_items == n_items:
+        if k_items in [0, n_items]:
             return 1
         if k_items > n_items // 2:
             k_items = n_items - k_items
@@ -2015,7 +2005,7 @@ class CodeParametersAndBoundsTool(BaseChannelCodingTool):
                 sum_combinations += comb
 
             val_for_perfection = 2 ** (n_codelength - k_info)
-            is_perfect = (sum_combinations == val_for_perfection)
+            is_perfect = sum_combinations == val_for_perfection
         else:
             is_perfect = False
             val_for_perfection = 0
@@ -2146,20 +2136,17 @@ class CodeParametersAndBoundsTool(BaseChannelCodingTool):
 
         if cleaned == 'q':
             return 'quit'
-        elif cleaned == '1':
+        if cleaned == '1':
             self.show_details(params)
-            return 'continue'
         elif cleaned == '2':
             self.show_perfectness_calc(params)
-            return 'continue'
         elif cleaned == '3':
             self.show_combinations(params)
-            return 'continue'
         else:
             print("Ungueltige Eingabe!")
             print("Nutze: 1, 2, 3 oder q")
             input("Enter...")
-            return 'continue'
+        return 'continue'
 
     def run(self):
         """Hauptschleife mit Menüführung."""

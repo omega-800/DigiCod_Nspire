@@ -729,18 +729,17 @@ class ChannelMatrixDeterminationTool(BaseChannelTool):
                     calc_y1 = input_probs[0] * epsilon + input_probs[1] * (
                         1 - epsilon)
 
-                    print("\n==== VERIFIKATION ====")
-                    print("P(Y) berechnet = [" + str(round(calc_y0, 4)) +
-                          ", " + str(round(calc_y1, 4)) + "]")
-                    print("P(Y) gegeben   = [" + str(round(p_y0, 4)) + ", " +
-                          str(round(p_y1, 4)) + "]")
-
                     # Prüfe Abweichung
                     error_y0 = abs(calc_y0 - p_y0)
                     error_y1 = abs(calc_y1 - p_y1)
                     if error_y0 < self.tolerance and error_y1 < self.tolerance:
                         print("Verifikation erfolgreich!")
                     else:
+                        print("\n==== VERIFIKATION ====")
+                        print("P(Y) berechnet = [" + str(round(calc_y0, 4)) +
+                              ", " + str(round(calc_y1, 4)) + "]")
+                        print("P(Y) gegeben   = [" + str(round(p_y0, 4)) + ", " +
+                              str(round(p_y1, 4)) + "]")
                         print("!! Abweichungen: Δy0=" +
                               str(round(error_y0, 6)) + ", Δy1=" +
                               str(round(error_y1, 6)))
@@ -751,7 +750,7 @@ class ChannelMatrixDeterminationTool(BaseChannelTool):
                     ).lower()
                     if full_analysis == 'q':
                         return
-                    elif full_analysis == 'j':
+                    if full_analysis == 'j':
                         print("\n--- Automatische BSC-Analyse mit ε = " +
                               str(round(epsilon, 4)) + " ---")
 
