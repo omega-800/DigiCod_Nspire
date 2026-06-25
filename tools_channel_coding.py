@@ -1502,14 +1502,14 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
         if input("Kontrollbits bekannt? (j/n) ") == 'j':
             eqs = [[int(input(f"Kontrollbitposition {i+1}: "))] + e for i, e in enumerate(equations)]
         else:
-            eqs = [[i + 1 + len(equations)] + e for i, e in enumerate(equations)]
+            eqs = [[i + 1 + max([max(e) for e in equations])] + e for i, e in enumerate(equations)]
 
         def h_times_v(v):
             ns = []
             for e in eqs:
                 s = 0
                 for i, c in enumerate(v):
-                    if i+1 in e and c == '1':
+                    if (i+1) in e and c == '1':
                         s+=1
                 ns.append(s % 2)
             return ''.join(str(n) for n in ns)
@@ -1531,10 +1531,16 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
         while True:
             if input("Fehlersyndrome berechnen? (n/j) ") != 'j':
                 break
-            # FIXME: seems wrong
             n = int(input("Anzahl gestörte Positionen: "))
             xs = [int(input(f"Position {i+1}: ")) for i in range(n)]
-            nw = [flip(c) if i+1 in xs else c for i, c in enumerate(w)]
+            nw = [flip(c) if i+1 in xs else c for i, c in enumerate(w + ctrls)]
+
+            print()
+            print("=== FEHLERSYNDROM ===")
+            print()
+
+            print("Gestörte positionen: " + ', '.join(["x" + str(i) for i in xs]))
+            print("Codewort: " + ''.join(nw))
             ctrls = h_times_v(nw)
             print("Fehlersyndrom: " + ctrls)
 
