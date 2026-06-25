@@ -31,16 +31,15 @@
           fetchFromGitHub,
         }:
         let
-          version = "2.1";
-          pname = "luna";
         in
         stdenv.mkDerivation {
-          inherit version pname;
+          version = "2.1";
+          pname = "luna";
           src = fetchFromGitHub {
             owner = "ndless-nspire";
             repo = "Luna";
-            rev = "v${version}";
-            hash = "sha256-3muTmw3sHLuh5s6Vm7/qTu3SMMoLIucjc5HKX62ZzMk=";
+            rev = "a9924a9a968954eba9adcc161a58ac607f97ce8c";
+            hash = "sha256-x/s3drSa0TC81SM+V7/WeQusDyY37OwToe+nEYyfdxA=";
           };
           installPhase = ''
             make install PREFIX="$out/bin"
@@ -67,7 +66,11 @@
           builder = "${bash}/bin/bash";
           src = fs.toSource {
             inherit root;
-            fileset = fs.intersection (fs.gitTracked root) (fs.fileFilter (f: f.hasExt "py") root);
+            fileset = fs.intersection (fs.gitTracked root) (
+              fs.fileFilter (
+                f: f.hasExt "py" && (!lib.hasPrefix "icth" f.name) && (!lib.hasPrefix "test" f.name)
+              ) root
+            );
           };
           args = [
             "-c"
