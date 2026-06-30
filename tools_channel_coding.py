@@ -1500,7 +1500,7 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
 
         eqs = []
         if input("Kontrollbits bekannt? (j/n) ") == 'j':
-            eqs = [[int(input(f"Kontrollbitposition {i+1}: "))] + e for i, e in enumerate(equations)]
+            eqs = [[int(input("Kontrollbitposition {}: ".format(i+1)))] + e for i, e in enumerate(equations)]
         else:
             eqs = [[i + 1 + max([max(e) for e in equations])] + e for i, e in enumerate(equations)]
 
@@ -1532,7 +1532,7 @@ class ComprehensiveCodeAnalysisTool(BaseChannelCodingTool):
             if input("Fehlersyndrome berechnen? (n/j) ") != 'j':
                 break
             n = int(input("Anzahl gestörte Positionen: "))
-            xs = [int(input(f"Position {i+1}: ")) for i in range(n)]
+            xs = [int(input("Position {}: ".format(i+1))) for i in range(n)]
             nw = [flip(c) if i+1 in xs else c for i, c in enumerate(w + ctrls)]
 
             print()
