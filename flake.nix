@@ -30,8 +30,6 @@
           stdenv,
           fetchFromGitHub,
         }:
-        let
-        in
         stdenv.mkDerivation {
           version = "2.1";
           pname = "luna";
@@ -68,13 +66,14 @@
             inherit root;
             fileset = fs.intersection (fs.gitTracked root) (
               fs.fileFilter (
-                f: f.hasExt "py" && (!lib.hasPrefix "icth" f.name) && (!lib.hasPrefix "test" f.name)
+                f: f.hasExt "py" && (!lib.hasPrefix "test" f.name)
               ) root
             );
           };
+          PATH="$PATH:${coreutils}/bin";
           args = [
             "-c"
-            ''${coreutils}/bin/mkdir -p "$out" && ${luna'}/bin/luna "$src/"*.py "$out/DigiCod_Nspire.tns"''
+            ''ls "$src/"*.py | sort && mkdir -p "$out" && ${luna'}/bin/luna $(ls "$src/"*.py | sort) "$out/DigiCod_Nspire.tns"''
           ];
         };
     in

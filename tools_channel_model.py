@@ -352,6 +352,113 @@ class TransinformationTool(BaseChannelTool):
         if self.wait_for_continue():
             return
 
+class MaximumAPosterioriTool(BaseChannelTool):
+    """Tool für Maximum-A-Posteriori-Entscheider"""
+
+    def run(self):
+        print("==== Maximum-A-Posteriori-Entscheider ====")
+        try:
+            n_input = self.safe_int_input("Anzahl der Eingangssymbole: ", 2,
+                                          10)
+            if n_input == 'q':
+                return
+
+            n_output = self.safe_int_input("Anzahl der Ausgangssymbole: ", 2,
+                                           10)
+            if n_output == 'q':
+                return
+
+            # Kanalmatrix mit Validierung
+            channel_matrix = self.input_channel_matrix_with_validation(
+                n_input, n_output)
+            if channel_matrix == 'q':
+                return
+
+            # Eingabewahrscheinlichkeiten mit Validierung
+            px = self.input_probabilities_with_validation(
+                "Eingabewahrscheinlichkeiten P(X)", n_input)
+            if px == 'q':
+                return
+
+            print("\n==== KANALMATRIX ====")
+            print("     ", end="")
+            for j in range(n_output):
+                print("y" + str(j) + "      ", end="")
+            print()
+
+            for i in range(n_input):
+                print("x" + str(i) + " ", end="")
+                for j in range(n_output):
+                    print(str(round(channel_matrix[i][j], 3)) + "   ", end="")
+                print()
+
+            print("\n==== MAP-ENTSCHEIDER-BERECHNUNG ====")
+            decoder = {}
+
+            for j in range(n_output):
+                max_prob = -1
+                best_input = -1
+
+                print("\nFür y" + str(j) + ":")
+                for i in range(n_input):
+                    prob = channel_matrix[i][j]
+                    x = px[i]
+                    pxpyx = x * prob
+                    print("P(x" + str(i) + ") * P(y" + str(j) + "|x" + str(i) + ") = " +
+                          str(round(pxpyx, 3)))
+                    if pxpyx > max_prob:
+                        max_prob = pxpyx
+                        best_input = i
+
+                decoder[j] = best_input
+                print("  → Wähle x" + str(best_input) + " (P = " +
+                      str(round(max_prob, 3)) + ")")
+
+            print("\n==== MAP-ENTSCHEIDER ====")
+            for j in range(n_output):
+                print("y" + str(j) + " → x" + str(decoder[j]))
+
+            # Berechne Fehlerwahrscheinlichkeit falls gewünscht
+            calc_error = input(
+                "\nFehlerwahrscheinlichkeit berechnen? (j/n/q): ").lower()
+            if calc_error in ['q', 'n']:
+                return
+            # Eingabewahrscheinlichkeiten mit Validierung
+            px = self.input_probabilities_with_validation(
+                "Eingabewahrscheinlichkeiten P(X)", n_input)
+            if px == 'q':
+                return
+
+            # Berechne Fehlerwahrscheinlichkeit
+            total_error_prob = 0
+            print("\n==== FEHLERWAHRSCHEINLICHKEITS-BERECHNUNG ====")
+
+            for i in range(n_input):
+                for j in range(n_output):
+                    decision = decoder[j]
+                    is_error = decision != i
+                    prob_contribution = px[i] * channel_matrix[i][j]
+
+                    if is_error:
+                        total_error_prob += prob_contribution
+                        error_indicator = "✗"
+                    else:
+                        error_indicator = "✓"
+
+                    print("P(x" + str(i) + ") * P(y" + str(j) + "|x" + str(i) +
+                          ") = " + str(round(px[i], 3)) + " * " +
+                          str(round(channel_matrix[i][j], 3)) + " = " +
+                          str(round(prob_contribution, 4)) + " [y" + str(j) +
+                          "→x" + str(decision) + "] " + error_indicator)
+
+            print("\nGesamtfehlerwahrscheinlichkeit: P(Fehler) = " +
+                  str(round(total_error_prob, 4)))
+
+        except Exception as e:
+            print("X Fehler: " + str(e))
+
+        if self.wait_for_continue():
+            return
 
 class MaximumLikelihoodTool(BaseChannelTool):
     """Tool für Maximum-Likelihood-Entscheider"""

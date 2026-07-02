@@ -2965,8 +2965,8 @@ def advanced_channel_menu():
                 # Optional: Matrix in Variable speichern
                 save = input("\nMatrix speichern? (j/n): ")
                 if save.lower() == "j":
-                    global saved_channel_matrix
-                    saved_channel_matrix = matrix
+                    # global saved_channel_matrix
+                    # saved_channel_matrix = matrix
                     print("Matrix gespeichert!")
             except Exception as e:
                 print(f"Fehler: {str(e)}")
